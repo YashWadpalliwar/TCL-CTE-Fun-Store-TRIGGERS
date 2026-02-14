@@ -1,0 +1,225 @@
+TCL (COMMAND)
+
+USE largedata1;
+
+SET AUTOCOMMIT = 0;
+
+select * from employees;
+
+-- update employees set age = 30 where id = 2;
+
+delete from employees where id = 21;
+
+commit;
+
+rollback;
+
+
+START TRANSACTION;
+
+SELECT * FROM employees;
+
+SAVEPOINT A;
+
+UPDATE employees SET age = 206 WHERE id = 1;
+
+SAVEPOINT D;
+
+UPDATE employees SET age = 250 WHERE id = 6;
+
+ROLLBACK;
+
+COMMIT;
+
+-----------------------------------------------------------------------------------
+//CTE
+
+
+use largedata1;
+
+-- 1. Select only employee names and departments using CTE
+WITH EmpNames AS (
+  SELECT Name, Department
+  FROM employees
+)
+SELECT * FROM EmpNames;
+
+-- --------------------------------------------------------- 
+ -- 2. List employees who are younger than 30
+ WITH YoungEmployees AS (
+  SELECT * FROM employees WHERE Age < 30
+)
+SELECT * FROM YoungEmployees;
+
+-- --------------------------------------------------------- 
+-- 6. Calculate average salary by department
+WITH DeptAvgSalary AS (
+  SELECT Department, AVG(Salary) AS AvgSalary FROM employeesdata
+  GROUP BY Department
+)
+SELECT * FROM DeptAvgSalary;
+
+
+
+WITH junior_employees AS (
+    SELECT ID, Name, Experience, Department
+    FROM employees
+    WHERE Experience <= 3
+),
+senior_employees AS (
+    SELECT ID, Name, Experience, Department
+    FROM employees
+    WHERE Experience > 3
+)
+SELECT *
+FROM junior_employees
+JOIN senior_employees
+ON junior_employees.Department = senior_employees.Department;
+
+--------------------------------------------------------------------
+//Function
+
+DELIMITER $$ 
+CREATE FUNCTION Showmsg()
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    RETURN 'Hello SQL';
+END$$ 
+DELIMITER 	;
+
+SELECT Showmsg();
+
+
+DROP FUNCTION IF EXISTS Showmsg;
+
+-- Addition of two numbers 
+DELIMITER $$
+CREATE FUNCTION Addition(num1 INT, num2 INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN num1 + num2;
+END$$
+DELIMITER ;
+
+select Addition(2,30);
+
+-- Function to concatenate two strings:
+DELIMITER $$
+CREATE FUNCTION ConcatenateStrings(str1 VARCHAR(255), str2 VARCHAR(255))
+RETURNS VARCHAR(510)
+DETERMINISTIC
+BEGIN
+    RETURN CONCAT(str1, str2);
+END$$
+DELIMITER ;
+
+select ConcatenateStrings('Yash -','Kumar'); 
+
+---------------------------------------------------------------------
+//Stored Command
+
+-- Use Database
+USE largedata1;
+
+-- View employee data
+SELECT * FROM employees;
+
+-------------------------------------------------
+-- 1. Simple SELECT Procedure
+-------------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE SimpleSelect()
+BEGIN
+    SELECT * FROM employees WHERE id = 2;
+END $$
+
+DELIMITER ;
+
+CALL SimpleSelect();
+
+-------------------------------------------------
+-- 2. INSERT Procedure
+-------------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE InsertExample()
+BEGIN
+    INSERT INTO employees
+        (id, name, age, experience, salary, gender, department)
+    VALUES 
+        (31, 'Rahul', 25, 2, 35000, 'Male', 'IT');
+END $$
+
+DELIMITER ;
+
+CALL InsertExample();
+
+drop PROCEDURE InsertExample;
+
+-------------------------------------------------
+-- 3. UPDATE Procedure
+-------------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE UpdateExample()
+BEGIN
+    UPDATE employees SET age = 300 WHERE id = 2;
+END $$
+
+DELIMITER ;
+
+CALL UpdateExample();
+
+-------------------------------------------------
+-- 4. DELETE Procedure
+-------------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE DeleteExample()
+BEGIN
+    DELETE FROM employeesdata WHERE id = 10;
+END $$
+
+DELIMITER ;
+
+CALL DeleteExample();
+
+-------------------------------------------------
+-- 5. COUNT Records Procedure
+-------------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE CountRecords()
+BEGIN
+    SELECT COUNT(*) AS TotalRecords FROM employeesdata;
+END $$
+
+DELIMITER ;
+
+CALL CountRecords();
+
+-------------------------------------------------
+-- 6. JOIN Example Procedure
+
+use joins;
+-------------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE GetJoinedUsers1()
+BEGIN
+    SELECT u1.*, u2.* FROM  user1 u1 
+    INNER JOIN  user2 u2
+    ON 
+        u1.id = u2.srno;
+END $$
+
+DELIMITER ;
+
+CALL GetJoinedUsers1();
+
+
+DROP PROCEDURE SimpleSelect;
+
